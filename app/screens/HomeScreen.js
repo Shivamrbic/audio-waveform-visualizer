@@ -9,7 +9,11 @@ export default function HomeScreen({ navigation }) {
     let result = await DocumentPicker.getDocumentAsync({});
     console.log("result", result);
     if (result.assets?.length > 0) {
-      setFile(result.assets[0]);
+      if (result.assets[0].uri.endsWith(".mp3")) {
+        setFile(result.assets[0]);
+      } else {
+        Alert.alert("Invalid File Type", "Please select an mp3 file.");
+      }
     }
   };
 

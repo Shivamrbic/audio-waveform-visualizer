@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Text, View, StyleSheet } from "react-native";
+import { Button, Text, View, StyleSheet, Alert } from "react-native";
 import { Audio } from "expo-av";
-import { Svg, Polyline } from "react-native-svg";
+import Svg, { Rect, Defs, LinearGradient, Stop } from "react-native-svg";
 
 export default function VisualizerScreen({ route }) {
   const { file } = route.params;
@@ -60,10 +60,10 @@ export default function VisualizerScreen({ route }) {
   };
 
   const generateWaveform = (status) => {
-    const length = 50; // Number of points in the waveform
+    const length = 50; // Number of bars in the waveform
     const waveform = [];
     for (let i = 0; i < length; i++) {
-      waveform.push({ x: i * 2, y: Math.random() * 50 });
+      waveform.push(Math.random() * 100);
     }
     return waveform;
   };
@@ -74,11 +74,17 @@ export default function VisualizerScreen({ route }) {
 
   const colors = [
     "#ff0000",
-    "#00ff00",
-    "#0000ff",
+    "#ff7f00",
     "#ffff00",
+    "#7fff00",
+    "#00ff00",
+    "#00ff7f",
     "#00ffff",
+    "#007fff",
+    "#0000ff",
+    "#7f00ff",
     "#ff00ff",
+    "#ff007f",
   ];
 
   return (
@@ -88,16 +94,29 @@ export default function VisualizerScreen({ route }) {
         <Svg
           height="200"
           width="100%"
-          viewBox="0 0 100 50"
+          viewBox="0 0 100 100"
           style={styles.visualizer}
         >
-          {waveform.map((point, index) => (
-            <Polyline
+          <Defs>
+            <LinearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              {colors.map((color, index) => (
+                <Stop
+                  key={index}
+                  offset={`${(index / colors.length) * 100}%`}
+                  stopColor={color}
+                  stopOpacity="1"
+                />
+              ))}
+            </LinearGradient>
+          </Defs>
+          {waveform.map((height, index) => (
+            <Rect
               key={index}
-              points={`${point.x},50 ${point.x},${50 - point.y}`}
-              fill="none"
-              stroke={colors[index % colors.length]}
-              strokeWidth="2"
+              x={index * 2}
+              y={50 - height / 2}
+              width="1"
+              height={height}
+              fill="url(#gradient)"
             />
           ))}
         </Svg>
@@ -113,7 +132,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 16,
-    backgroundColor: "#121212",
+    backgroundColor: "#000",
   },
   fileName: {
     fontSize: 16,

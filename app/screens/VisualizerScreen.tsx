@@ -3,22 +3,45 @@ import { Button, Text, View, StyleSheet } from "react-native";
 import { Audio } from "expo-av";
 import {
   FinishMode,
+  IWaveformRef,
   PlayerState,
   Waveform,
 } from "@simform_solutions/react-native-audio-waveform";
 
-export default function VisualizerScreen({ route }) {
-  const { file } = route.params;
-  const sound = useRef(new Audio.Sound());
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [playerState, setPlayerState] = useState(PlayerState.stopped);
-  const [currentPlaying, setCurrentPlaying] = useState("");
+interface RouteParams {
+  file: {
+    name: string;
+    uri: string;
+  };
+}
 
-  const ref = useRef(null);
+interface Props {
+  route: {
+    params: RouteParams;
+  };
+}
+
+export default function VisualizerScreen({ route }: Props) {
+  const { file } = route.params;
+  const [playerState, setPlayerState] = useState<PlayerState>(
+    PlayerState.stopped
+  );
+
+  const ref = useRef<IWaveformRef>(null);
+
+  useEffect(() => {
+    return () => {
+      if (ref.current) {
+        ref.current?.stopPlayer();
+      }
+    };
+  }, []);
 
   const handleButtonAction = () => {
-    if (playerState === PlayerState.paused) {
-      // setCurrentPlaying(file.uri);
+    if (
+      playerState === PlayerState.paused ||
+      playerState === PlayerState.stopped
+    ) {
       ref.current?.startPlayer({ finishMode: FinishMode.stop });
     } else {
       ref.current?.pausePlayer();
@@ -39,13 +62,13 @@ export default function VisualizerScreen({ route }) {
         scrubColor={"white"}
         waveColor={"gray"}
         onPlayerStateChange={setPlayerState}
-        onPanStateChange={(e) => console.log("e", e)}
+        onPanStateChange={(e) => console.log("onPanStateChange", e)}
         onError={(error) => {
           console.log(error, "we are in example");
         }}
       />
       <Button
-        title={playerState !== PlayerState.paused ? "Pause" : "Play"}
+        title={playerState === PlayerState.playing ? "Pause" : "Play"}
         onPress={handleButtonAction}
       />
     </View>

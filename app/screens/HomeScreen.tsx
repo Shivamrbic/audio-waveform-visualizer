@@ -1,16 +1,38 @@
 import React, { useState } from "react";
 import { Button, Text, View, StyleSheet } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
+import { Alert } from "react-native";
 
-export default function HomeScreen({ navigation }) {
-  const [file, setFile] = useState(null);
+interface File {
+  uri: string;
+  name: string;
+}
+
+interface Props {
+  navigation: any;
+}
+type DocumentPickerAsset = {
+  name: string;
+  size?: number | undefined;
+  uri: string;
+  mimeType?: string | undefined;
+  lastModified?: number | undefined;
+  file?: globalThis.File | undefined;
+};
+
+export default function HomeScreen({ navigation }: Props) {
+  const [file, setFile] = useState<File | null>(null);
 
   const pickDocument = async () => {
-    let result = await DocumentPicker.getDocumentAsync({});
-    console.log("result", result);
-    if (result.assets?.length > 0) {
-      if (result.assets[0].uri.endsWith(".mp3")) {
-        setFile(result.assets[0]);
+    const result: DocumentPicker.DocumentPickerResult | null = await DocumentPicker.getDocumentAsync(
+      {}
+    );
+    if (result.assets && result.assets?.length > 0) {
+      const assets: DocumentPickerAsset | null = result.assets[0];
+      console.log("result", result);
+
+      if (assets.uri.endsWith(".mp3")) {
+        setFile(assets);
       } else {
         Alert.alert("Invalid File Type", "Please select an mp3 file.");
       }
